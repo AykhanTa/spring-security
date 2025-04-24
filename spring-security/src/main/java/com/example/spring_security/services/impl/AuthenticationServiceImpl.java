@@ -10,6 +10,8 @@ import com.example.spring_security.repository.UserRepository;
 import com.example.spring_security.services.AuthenticationService;
 import com.example.spring_security.services.JWTService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,6 +22,8 @@ import java.util.HashMap;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
+
     private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
@@ -29,6 +33,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final JWTService jwtService;
 
     public User signUp(SignUpRequest signUpRequest){
+        logger.info("SignUp new user: {}", signUpRequest.getEmail());
         var existUser=userRepository.findByEmail(signUpRequest.getEmail());
         if(existUser.isPresent()){
             throw new IllegalArgumentException("User with this email already exists");
@@ -42,10 +47,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         user.setRole(Role.USER);
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 
-        return userRepository.save(user);
+        userRepository.save(user);
+        logger.info("User added with ID: {}", user.getId());
+        return user;
     }
 
     public JwtAuthenticationResponse signIn(SignInRequest signInRequest){
+        logger.info("SignIn user: {}", signInRequest.getEmail());
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(signInRequest.getEmail(),
                         signInRequest.getPassword()));
@@ -57,10 +65,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         JwtAuthenticationResponse jwtAuthenticationResponse=new JwtAuthenticationResponse();
         jwtAuthenticationResponse.setToken(jwt);
         jwtAuthenticationResponse.setRefreshToken(refreshToken);
+        logger.info("JWT token and refreshToken generated successfully");
         return jwtAuthenticationResponse;
     }
 
     public JwtAuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest){
+        logger.info("Updating  access token for refresh token");
         String userEmail=jwtService.extractUsername(refreshTokenRequest.getToken());
         var user=userRepository.findByEmail(userEmail)
                 .orElseThrow(()-> new IllegalArgumentException("Invalid email or password"));
@@ -70,8 +80,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             JwtAuthenticationResponse jwtAuthenticationResponse=new JwtAuthenticationResponse();
             jwtAuthenticationResponse.setToken(jwt);
             jwtAuthenticationResponse.setRefreshToken(refreshTokenRequest.getToken());
+            logger.info("Access token generated successfully");
             return jwtAuthenticationResponse;
         }
+        logger.error("Invalid refresh token");
         return null;
     }
 }

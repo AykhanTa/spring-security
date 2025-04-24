@@ -1,0 +1,8 @@
+2025-04-24 12:02:26 [http-nio-8080-exec-2] INFO  c.e.s.s.i.AuthenticationServiceImpl - SignIn user: admin@example.com
+2025-04-24 12:02:26 [http-nio-8080-exec-2] INFO  c.e.s.s.i.AuthenticationServiceImpl - JWT token and refreshToken generated successfully
+2025-04-24 12:02:48 [http-nio-8080-exec-3] INFO  c.e.s.s.i.AuthenticationServiceImpl - Updating  access token for refresh token
+2025-04-24 12:02:48 [http-nio-8080-exec-3] INFO  c.e.s.s.i.AuthenticationServiceImpl - Access token generated successfully
+2025-04-24 12:02:50 [http-nio-8080-exec-4] INFO  c.e.s.s.i.AuthenticationServiceImpl - Updating  access token for refresh token
+2025-04-24 12:02:50 [http-nio-8080-exec-4] INFO  c.e.s.s.i.AuthenticationServiceImpl - Access token generated successfully
+2025-04-24 12:04:24 [http-nio-8080-exec-7] INFO  c.e.s.s.i.AuthenticationServiceImpl - SignUp new user: aykhant@gmail.com
+2025-04-24 12:04:24 [http-nio-8080-exec-7] INFO  c.e.s.s.i.AuthenticationServiceImpl - User added with ID: 4
