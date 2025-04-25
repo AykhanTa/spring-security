@@ -6,6 +6,9 @@ import com.example.spring_security.dtos.SignInRequest;
 import com.example.spring_security.dtos.SignUpRequest;
 import com.example.spring_security.entities.Role;
 import com.example.spring_security.entities.User;
+import com.example.spring_security.exception.AlreadyExistsException;
+import com.example.spring_security.exception.InvalidCredentialsException;
+import com.example.spring_security.exception.InvalidRefreshTokenException;
 import com.example.spring_security.repository.UserRepository;
 import com.example.spring_security.services.AuthenticationService;
 import com.example.spring_security.services.JWTService;
@@ -36,7 +39,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         logger.info("SignUp new user: {}", signUpRequest.getEmail());
         var existUser=userRepository.findByEmail(signUpRequest.getEmail());
         if(existUser.isPresent()){
-            throw new IllegalArgumentException("User with this email already exists");
+            throw new AlreadyExistsException();
         }
 
         User user=new User();
@@ -58,7 +61,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 new UsernamePasswordAuthenticationToken(signInRequest.getEmail(),
                         signInRequest.getPassword()));
         var user=userRepository.findByEmail(signInRequest.getEmail())
-                .orElseThrow(()-> new IllegalArgumentException("Invalid email or password"));
+                .orElseThrow(InvalidCredentialsException::new);
         var jwt =jwtService.generateToken(user);
         var refreshToken=jwtService.generateRefreshToken(new HashMap<>(),user);
 
@@ -73,7 +76,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         logger.info("Updating  access token for refresh token");
         String userEmail=jwtService.extractUsername(refreshTokenRequest.getToken());
         var user=userRepository.findByEmail(userEmail)
-                .orElseThrow(()-> new IllegalArgumentException("Invalid email or password"));
+                .orElseThrow(InvalidCredentialsException::new);
         if(jwtService.isTokenValid(refreshTokenRequest.getToken(),user)){
             var jwt=jwtService.generateToken(user);
 
@@ -84,6 +87,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return jwtAuthenticationResponse;
         }
         logger.error("Invalid refresh token");
-        return null;
+        throw new InvalidRefreshTokenException("Invalid refresh token");
     }
 }

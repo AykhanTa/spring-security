@@ -1,5 +1,6 @@
 package com.example.spring_security.services.impl;
 
+import com.example.spring_security.exception.NotFoundException;
 import com.example.spring_security.repository.UserRepository;
 import com.example.spring_security.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ public class UserServiceImpl implements UserService {
             @Override
             public UserDetails loadUserByUsername(String username) {
                 return userRepository.findByEmail(username)
-                        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                        .orElseThrow(() -> new NotFoundException("User not found"));
             }
         };
     }
